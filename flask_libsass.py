@@ -2,6 +2,8 @@ import os
 import posixpath
 import hashlib
 
+from werkzeug.exceptions import NotFound
+
 from flask import current_app, request, Response
 from flask import _app_ctx_stack as stack
 
@@ -77,4 +79,3 @@ class Sass(object):
         else:
             css = self.compile(filename)
             return Response(css, content_type='text/css')
-
