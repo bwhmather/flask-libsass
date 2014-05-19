@@ -55,7 +55,7 @@ class Sass(object):
 
         rebuild = current_app.config.get('SASS_REBUILD', False)
 
-        if rebuild:
+        if not rebuild:
             if not hasattr(stack.top, 'sass_cache'):
                 stack.top.sass_cache = {}
             cache = stack.top.sass_cache
