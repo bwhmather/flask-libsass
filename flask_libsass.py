@@ -1,7 +1,8 @@
 import os
 import posixpath
+import hashlib
 
-from flask import current_app, Response
+from flask import current_app, request, Response
 from flask import _app_ctx_stack as stack
 
 import sass
@@ -61,9 +62,19 @@ class Sass(object):
             cache = stack.top.sass_cache
 
             if filename not in cache:
-                cache[filename] = self.compile(filename)
-            css = cache[filename]
+                css = self.compile(filename)
+                etag = hashlib.sha1(css).hexdigest()
+                cache[filename] = (css, etag)
+            else:
+                css, etag = cache[filename]
+
+            response = Response(css, content_type='text/css')
+            response.set_etag(etag)
+            response.make_conditional(request)
+
+            return response
+
         else:
             css = self.compile(filename)
+            return Response(css, content_type='text/css')
 
-        return Response(css, content_type='text/css')
