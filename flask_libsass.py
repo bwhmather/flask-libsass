@@ -21,6 +21,33 @@ class Sass(object):
     def __init__(self, files, app=None,
                  url_path='/css', endpoint='sass',
                  include_paths=None, output_style=None):
+        """
+        :param files:
+            A dictionary mapping output file path (without extension) to the
+            root input sass or scss file.  The input file is searched for
+            relative to the application resource root.
+
+        :param app:
+            A flask application to bind the extension to.
+
+        :param url_path:
+            A prefix to add to the path of the url of the generated css.
+
+        :param endpoint:
+            A string that can be passed to `url_for` to find the url for a
+            generated css file.  Defaults to `sass`.
+
+        :param include_paths:
+            A list of directories for scss to search for included files.
+            Relative paths are resolved from pwd.  Using
+            `pkg_resources.resource_filename` is recommended. The directory
+            containing the root input file takes priority.
+
+        :param output_style:
+            A string specifiying how the generated css should appear.  One of
+            `"nested"`, `"expanded"` `"compact"` or `"compressed"`.  Defaults
+            to `"nested"`.  See the libsass documentation for details.
+        """
         self._files = files
         self._url_path = url_path
         self._endpoint = endpoint
