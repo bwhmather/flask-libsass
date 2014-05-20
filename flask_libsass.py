@@ -67,7 +67,7 @@ class Sass(object):
             view_func=self.send_css
         )
 
-    def compile(self, filename):
+    def _compile(self, filename):
         input_file = os.path.join(
             current_app.root_path,
             self._files[filename]
@@ -91,7 +91,7 @@ class Sass(object):
             cache = stack.top.sass_cache
 
             if filename not in cache:
-                css = self.compile(filename)
+                css = self._compile(filename)
                 etag = hashlib.sha1(css).hexdigest()
                 cache[filename] = (css, etag)
             else:
@@ -104,5 +104,5 @@ class Sass(object):
             return response
 
         else:
-            css = self.compile(filename)
+            css = self._compile(filename)
             return Response(css, content_type='text/css')
