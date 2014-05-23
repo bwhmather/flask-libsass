@@ -1,13 +1,43 @@
 import os
 import posixpath
+import hashlib
 
-from flask import current_app, Response
+from werkzeug.exceptions import NotFound
+
+from flask import current_app, request, Response
 from flask import _app_ctx_stack as stack
 
 import sass
 
 
 class Sass(object):
+    """
+    `files`
+        A dictionary mapping output file path (without extension) to the
+        root input sass or scss file.  The input file is searched for
+        relative to the application resource root.
+
+    `app`
+        A flask application to bind the extension to.
+
+    `url_path`
+        A prefix to add to the path of the url of the generated css.
+
+    `endpoint`
+        A string that can be passed to `url_for` to find the url for a
+        generated css file.  Defaults to `sass`.
+
+    `include_paths`
+        A list of directories for scss to search for included files.
+        Relative paths are resolved from pwd.  Using
+        `pkg_resources.resource_filename` is recommended. The directory
+        containing the root input file takes priority.
+
+    `output_style`
+        A string specifiying how the generated css should appear.  One of
+        `"nested"`, `"expanded"` `"compact"` or `"compressed"`.  Defaults
+        to `"nested"`.  See the libsass documentation for details.
+    """
     _output_styles = {
         'nested': sass.SASS_STYLE_NESTED,
         'expanded': sass.SASS_STYLE_EXPANDED,
@@ -37,7 +67,7 @@ class Sass(object):
             view_func=self.send_css
         )
 
-    def compile(self, filename):
+    def _compile(self, filename):
         input_file = os.path.join(
             current_app.root_path,
             self._files[filename]
@@ -55,15 +85,24 @@ class Sass(object):
 
         rebuild = current_app.config.get('SASS_REBUILD', False)
 
-        if rebuild:
+        if not rebuild:
             if not hasattr(stack.top, 'sass_cache'):
                 stack.top.sass_cache = {}
             cache = stack.top.sass_cache
 
             if filename not in cache:
-                cache[filename] = self.compile(filename)
-            css = cache[filename]
-        else:
-            css = self.compile(filename)
+                css = self._compile(filename)
+                etag = hashlib.sha1(css).hexdigest()
+                cache[filename] = (css, etag)
+            else:
+                css, etag = cache[filename]
 
-        return Response(css, content_type='text/css')
+            response = Response(css, content_type='text/css')
+            response.set_etag(etag)
+            response.make_conditional(request)
+
+            return response
+
+        else:
+            css = self._compile(filename)
+            return Response(css, content_type='text/css')
