@@ -8,6 +8,7 @@ It supports automatic rebuilding for development and etags for caching in produc
 Example usage:
 
 .. code:: python
+
     app = Flask(__main__)
 
     Sass(
