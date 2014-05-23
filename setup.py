@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='Flask-libsass',
-    version='1.0',
+    version='1.1.0',
     url='https://github.com/bwhmather/flask-libsass/',
     license='BSD',
     author='Ben Mather',
