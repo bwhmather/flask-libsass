@@ -3,6 +3,7 @@ Flask-libass
 
 Flask extension for serving css generated from sass or scss.
 Uses the bindings to libsass at https://pypi.python.org/pypi/sass/
+It supports automatic rebuilding for development and etags for caching in production.
 
 Example usage:
 
