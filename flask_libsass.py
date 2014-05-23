@@ -64,7 +64,7 @@ class Sass(object):
         app.add_url_rule(
             posixpath.join(self._url_path, '<path:filename>.css'),
             endpoint=self._endpoint,
-            view_func=self.send_css
+            view_func=self._send_css
         )
 
     def _compile(self, filename):
@@ -79,7 +79,7 @@ class Sass(object):
             output_style=self._output_style
         )
 
-    def send_css(self, filename):
+    def _send_css(self, filename):
         if filename not in self._files:
             raise NotFound()
 
